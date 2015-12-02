@@ -52,6 +52,7 @@ object Boot extends App with LazyLogging {
     val configKey = s"openolitor.${key}"
   }
 
+  val defaultAkkaSystem = ActorSystem("default")
   val config = ConfigFactory.load()
 
   // instanciate actor system per mandant, with mandantenspecific configuration

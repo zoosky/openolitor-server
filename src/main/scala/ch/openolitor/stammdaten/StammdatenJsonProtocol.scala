@@ -64,6 +64,22 @@ object StammdatenJsonProtocol extends DefaultJsonProtocol {
   implicit val heimlieferungFormat = jsonFormat4(Heimlieferung.apply)
   implicit val postlieferungFormat = jsonFormat3(Postlieferung.apply)
 
+  implicit val vertriebsartFormat = new JsonFormat[Vertriebsart] {
+    def write(obj: Vertriebsart): JsValue =
+      JsObject((obj match {
+        case p: Postlieferung => p.toJson
+        case hl: Heimlieferung => hl.toJson
+        case dl: Depotlieferung => dl.toJson
+      }).asJsObject.fields + ("type" -> JsString(obj.productPrefix)))
+
+    def read(json: JsValue): Vertriebsart =
+      json.asJsObject.getFields("type") match {
+        case Seq(JsString("Postlieferung")) => json.convertTo[Postlieferung]
+        case Seq(JsString("Heimlieferung")) => json.convertTo[Heimlieferung]
+        case Seq(JsString("Depotlieferung")) => json.convertTo[Depotlieferung]
+      }
+  }
+
   implicit val depot = jsonFormat3(Depot.apply)
   implicit val tour = jsonFormat3(Tour.apply)
 
@@ -90,4 +106,52 @@ object StammdatenJsonProtocol extends DefaultJsonProtocol {
   implicit val abotypFormat = jsonFormat12(Abotyp.apply)
   implicit val abotypDetailFormat = jsonFormat13(AbotypDetail.apply)
   implicit val abotypCreateFormat = jsonFormat9(AbotypCreate.apply)
+
+  implicit val stammdatenBaseEntityFormat = new JsonFormat[StammdatenBaseEntity[_]] {
+    def write(obj: StammdatenBaseEntity[_]): JsValue =
+      JsObject((obj match {
+        case e: Abotyp => e.toJson
+        case e: Depot => e.toJson
+        case e: Vertriebsart => e.toJson
+        case e: Tour => e.toJson
+      }).asJsObject.fields + ("type" -> JsString(obj.productPrefix)))
+
+    def read(json: JsValue): StammdatenBaseEntity[_] =
+      json.asJsObject.getFields("type") match {
+        case Seq(JsString("Abotyp")) => json.convertTo[Abotyp]
+        case Seq(JsString("Depot")) => json.convertTo[Depot]
+        case Seq(JsString("Vertriebsart")) => json.convertTo[Vertriebsart]
+        case Seq(JsString("Tour")) => json.convertTo[Tour]
+      }
+  }
+
+  implicit val stammdatenCreateModelFormat = new JsonFormat[StammdatenCreateModel] {
+    def write(obj: StammdatenCreateModel): JsValue =
+      JsObject((obj match {
+        case e: AbotypCreate => e.toJson
+      }).asJsObject.fields + ("type" -> JsString(obj.productPrefix)))
+
+    def read(json: JsValue): StammdatenCreateModel =
+      json.asJsObject.getFields("type") match {
+        case Seq(JsString("AbotypCreate")) => json.convertTo[AbotypCreate]
+      }
+  }
+
+  implicit val stammdatenBaseIdFormat = new JsonFormat[StammdatenBaseId] {
+    def write(obj: StammdatenBaseId): JsValue =
+      JsObject((obj match {
+        case e: AbotypId => e.toJson
+        case e: DepotId => e.toJson
+        case e: TourId => e.toJson
+        case e: VertriebsartId => e.toJson
+      }).asJsObject.fields + ("type" -> JsString(obj.productPrefix)))
+
+    def read(json: JsValue): StammdatenBaseId =
+      json.asJsObject.getFields("type") match {
+        case Seq(JsString("AbotypId")) => json.convertTo[AbotypId]
+        case Seq(JsString("DepotId")) => json.convertTo[DepotId]
+        case Seq(JsString("TourId")) => json.convertTo[TourId]
+        case Seq(JsString("VertriebsartId")) => json.convertTo[VertriebsartId]
+      }
+  }
 }

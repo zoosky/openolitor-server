@@ -26,7 +26,7 @@ import akka.persistence.PersistentView
 import akka.actor._
 import ch.openolitor.core._
 import ch.openolitor.core.db._
-import ch.openolitor.core.domain.EntityStore
+import ch.openolitor.core.domain._
 import scala.concurrent.duration._
 import ch.openolitor.stammdaten._
 import ch.openolitor.stammdaten.dto.AbotypDetail
@@ -46,7 +46,6 @@ class DefaultStammdatenUpdateActor(sysConfig: SystemConfig)
  */
 class StammdatenUpdateActor(override val sysConfig: SystemConfig) extends Actor with ActorLogging with ConnectionPoolContextAware {
   self: StammdatenRepositoryComponent =>
-  import EntityStore._
 
   val receive: Receive = {
     case EntityUpdatedEvent(meta, entity: AbotypDetail) =>

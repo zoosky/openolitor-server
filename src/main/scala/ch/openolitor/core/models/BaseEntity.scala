@@ -23,11 +23,13 @@
 package ch.openolitor.core.models
 
 import java.util.UUID
+import spray.json.JsonFormat
+import spray.json.JsValue
 
-trait BaseId {
+trait BaseId extends Product {
   val id: UUID
 }
 
-trait BaseEntity[T <: BaseId] {
+trait BaseEntity[T <: BaseId] extends Product {
   val id: T
 }

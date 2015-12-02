@@ -40,6 +40,10 @@ import ch.openolitor.core.models.BaseEntity
 import scala.concurrent.ExecutionContext
 import ch.openolitor.core.models.BaseEntity
 import scalikejdbc.metadata.Column
+import ch.openolitor.core.models.BaseEntity
+
+sealed trait StammdatenBaseEntity[I <: StammdatenBaseId] extends BaseEntity[I]
+sealed trait StammdatenBaseId extends BaseId
 
 sealed trait Lieferzeitpunkt extends Product
 sealed trait Wochentag extends Lieferzeitpunkt
@@ -85,8 +89,8 @@ object Preiseinheit {
   }
 }
 
-case class VertriebsartId(id: UUID = UUID.randomUUID) extends BaseId
-sealed trait Vertriebsart extends BaseEntity[VertriebsartId]
+case class VertriebsartId(id: UUID = UUID.randomUUID) extends StammdatenBaseId
+sealed trait Vertriebsart extends StammdatenBaseEntity[VertriebsartId]
 case class Depotlieferung(id: VertriebsartId, abotypId: AbotypId, depotId: DepotId, liefertage: Seq[Lieferzeitpunkt]) extends Vertriebsart
 case class Heimlieferung(id: VertriebsartId, abotypId: AbotypId, tourId: TourId, liefertage: Seq[Lieferzeitpunkt]) extends Vertriebsart
 case class Postlieferung(id: VertriebsartId, abotypId: AbotypId, liefertage: Seq[Lieferzeitpunkt]) extends Vertriebsart
@@ -115,7 +119,7 @@ trait IAbotyp {
   val aktiv: Boolean
 }
 
-case class AbotypId(id: UUID) extends BaseId
+case class AbotypId(id: UUID) extends StammdatenBaseId
 case class Abotyp(id: AbotypId,
   name: String,
   beschreibung: Option[String],
@@ -128,7 +132,7 @@ case class Abotyp(id: AbotypId,
   aktiv: Boolean,
   //Zusatzinformationen
   anzahlAbonnenten: Int,
-  letzteLieferung: Option[DateTime]) extends BaseEntity[AbotypId] with IAbotyp
+  letzteLieferung: Option[DateTime]) extends StammdatenBaseEntity[AbotypId] with IAbotyp
 
 case class Projekt(id: UUID,
   name: String,
@@ -139,11 +143,11 @@ sealed trait Vertriebskanal {
   val beschreibung: Option[String]
 }
 
-case class DepotId(id: UUID) extends BaseId
-case class Depot(id: DepotId, name: String, beschreibung: Option[String]) extends BaseEntity[DepotId] with Vertriebskanal
+case class DepotId(id: UUID) extends StammdatenBaseId
+case class Depot(id: DepotId, name: String, beschreibung: Option[String]) extends StammdatenBaseEntity[DepotId] with Vertriebskanal
 
-case class TourId(id: UUID) extends BaseId
-case class Tour(id: TourId, name: String, beschreibung: Option[String]) extends BaseEntity[TourId] with Vertriebskanal
+case class TourId(id: UUID) extends StammdatenBaseId
+case class Tour(id: TourId, name: String, beschreibung: Option[String]) extends StammdatenBaseEntity[TourId] with Vertriebskanal
 
 //DB Model bindig
 

@@ -26,11 +26,11 @@ import akka.actor._
 import akka.persistence.PersistentView
 import ch.openolitor.core._
 import ch.openolitor.core.db.ConnectionPoolContextAware
-import ch.openolitor.core.domain.EntityStore
 import ch.openolitor.stammdaten._
 import ch.openolitor.stammdaten.dto._
 import java.util.UUID
 import scalikejdbc.DB
+import ch.openolitor.core.domain._
 
 object StammdatenInsertActor {
   def props(implicit sysConfig: SystemConfig): Props = Props(classOf[DefaultStammdatenInsertActor], sysConfig)
@@ -45,7 +45,6 @@ class DefaultStammdatenInsertActor(sysConfig: SystemConfig)
  */
 class StammdatenInsertActor(override val sysConfig: SystemConfig) extends Actor with ActorLogging with ConnectionPoolContextAware {
   self: StammdatenRepositoryComponent =>
-  import EntityStore._
 
   val receive: Receive = {
     case EntityInsertedEvent(meta, id, abotyp: AbotypCreate) =>

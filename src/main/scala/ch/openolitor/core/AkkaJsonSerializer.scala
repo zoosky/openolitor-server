@@ -22,42 +22,52 @@
 \*                                                                           */
 package ch.openolitor.core
 
-import spray.httpx.unmarshalling._
-import ch.openolitor.core.models.BaseId
-import java.util.UUID
-import spray.routing._
-import shapeless.HNil
-import spray.http.Uri.Path
-import spray.json._
+import akka.serialization._
 import ch.openolitor.core.domain._
+import akka.actor.ActorSystem
+import spray.json.JsonParser
+import akka.actor.ActorSystem
 
-trait SprayDeserializers {
-  implicit val string2BooleanConverter = new Deserializer[String, Boolean] {
-    def apply(value: String) = value.toLowerCase match {
-      case "true" | "yes" | "on" => Right(true)
-      case "false" | "no" | "off" => Right(false)
-      case x => Left(MalformedContent("'" + x + "' is not a valid Boolean value"))
+class AkkaJsonSerializer extends Serializer with BaseEventsJsonProtocol {
+  // This is whether "fromBinary" requires a "clazz" or not
+  def includeManifest: Boolean = true
+
+  val charset = "UTF-8"
+
+  val serialization = SerializationExtension(Boot.defaultAkkaSystem)
+
+  // Pick a unique identifier for your Serializer,
+  // you've got a couple of billions to choose from,
+  // 0 - 16 is reserved by Akka itself
+  def identifier = 763232434
+
+  // "toBinary" serializes the given object to an Array of Bytes
+  def toBinary(obj: AnyRef): Array[Byte] = {
+    if (obj.isInstanceOf[PersistetEvent]) {
+      val event = obj.asInstanceOf[PersistetEvent]
+      val json = persistetEventFormat.write(event)
+      json.toString.getBytes(charset);
+    } else {
+      Array.empty
     }
   }
 
-  def string2BaseIdPathMatcher[T <: BaseId](implicit f: UUID => T): spray.routing.PathMatcher1[T] = {
-    PathMatchers.JavaUUID.flatMap(uuid => Some(f(uuid)))
-  }
+  def isAssignableFrom[T: Manifest](c: Class[_]) =
+    manifest[T].runtimeClass.isAssignableFrom(c)
 
-  def string2BaseIdConverter[T <: BaseId](implicit f: UUID => T) = new Deserializer[String, T] {
-    def apply(value: String) = {
-      try {
-        val uuid = UUID.fromString(value)
-        if (uuid == null) {
-          Left(MalformedContent(s"'$value' is not a valid UUID:null"))
-        } else {
-          Right(f(uuid))
-        }
-      } catch {
-        case e: Exception =>
-          Left(MalformedContent(s"'$value' is not a valid UUID:$e"))
+  // "fromBinary" deserializes the given array,
+  // using the type hint (if any, see "includeManifest" above)
+  def fromBinary(bytes: Array[Byte],
+    clazz: Option[Class[_]]): AnyRef = {
+
+    val r = clazz.map { cl =>
+      if (isAssignableFrom[PersistetEvent](cl)) {
+        val json = JsonParser.apply(new String(bytes, charset))
+        persistetEventFormat.read(json)
       }
     }
-
+    r.asInstanceOf[AnyRef]
   }
+
 }
+

@@ -27,6 +27,8 @@ import org.joda.time.DateTime
 import ch.openolitor.core.models._
 import scalikejdbc._
 
+sealed trait StammdatenCreateModel extends Product
+
 case class AbotypCreate(
   name: String,
   beschreibung: Option[String],
@@ -36,7 +38,7 @@ case class AbotypCreate(
   anzahlAbwesenheiten: Option[Int],
   preis: BigDecimal,
   preisEinheit: Preiseinheit,
-  vertriebsarten: Seq[Vertriebsartdetail])
+  vertriebsarten: Seq[Vertriebsartdetail]) extends StammdatenCreateModel
 
 case class AbotypDetail(id: AbotypId,
   name: String,
