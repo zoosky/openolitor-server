@@ -48,6 +48,7 @@ import spray.http.HttpHeaders.RawHeader
 import spray.http.HttpHeaders.Location
 import spray.json._
 import ch.openolitor.core.BaseJsonProtocol._
+import ch.openolitor.filestore.FilestoreRoutes
 
 object RouteServiceActor {
   def props(entityStore: ActorRef)(implicit sysConfig: SystemConfig, system: ActorSystem): Props = Props(classOf[RouteServiceActor], entityStore, sysConfig, system)
@@ -60,6 +61,7 @@ class RouteServiceActor(override val entityStore: ActorRef, override val sysConf
   with DefaultRouteService
   with HelloWorldRoutes
   with StammdatenRoutes
+  with FilestoreRoutes
   with DefaultStammdatenRepositoryComponent
   with CORSSupport {
 

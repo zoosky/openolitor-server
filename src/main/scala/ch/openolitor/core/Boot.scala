@@ -53,6 +53,7 @@ import java.net.ServerSocket
 import spray.http.Uri
 import ch.openolitor.core.proxy.ProxyServiceActor
 import util.Properties
+import ch.openolitor.filestore.S3Accessor
 
 case class SystemConfig(mandant: String, cpContext: ConnectionPoolContext, asyncCpContext: MultipleAsyncConnectionPoolContext)
 
@@ -158,6 +159,9 @@ object Boot extends App with LazyLogging {
       //start actor mapping dbevents to client messages
       val dbEventClientMessageMapper = Await.result(system ? SystemActor.Child(DBEvent2UserMapping.props, "db-event-mapper"), duration).asInstanceOf[ActorRef]
 
+      //start actor accessing S3 store
+      val s3accessor = Await.result(system ? SystemActor.Child(S3Accessor.props, "s3-accessor"), duration).asInstanceOf[ActorRef]
+      
       //initialize global persistentviews
       logger.debug(s"oo-system: send Startup to entityStoreview")
       stammdatenEntityStoreView ! EntityStoreView.Startup

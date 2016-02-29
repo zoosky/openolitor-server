@@ -41,6 +41,8 @@ object BuildSettings {
 	    "org.scalikejdbc" 	  %% "scalikejdbc-syntax-support-macro"  % scalalikeV,
 	    "ch.qos.logback"  	  %  "logback-classic"    		  		 % "1.1.3",
 	    "org.mariadb.jdbc"	  %  "mariadb-java-client"               % "1.3.2",
+	    //s3 access
+	    "com.sclasen"         %% "spray-s3" % "0.3.6",
 	    // Libreoffice document API
 	    "org.apache.odftoolkit"	  %  "simple-odf"					 % "0.8.1-incubating",
 	    "com.jsuereth" %% "scala-arm" % "1.4",
