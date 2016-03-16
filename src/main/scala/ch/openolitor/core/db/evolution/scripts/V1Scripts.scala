@@ -59,6 +59,7 @@ object V1Scripts {
       sql"drop table if exists ${produktProduzentMapping.table}".execute.apply()
       sql"drop table if exists ${produktProduktekategorieMapping.table}".execute.apply()
 
+
       logger.debug(s"oo-system: cleanupDatabase - create tables")
       //create tables
 

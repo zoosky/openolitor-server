@@ -162,7 +162,7 @@ class StammdatenInsertService(override val sysConfig: SystemConfig) extends Even
       writeRepository.insertEntity[Lieferung, LieferungId](insert)
     }
   }
-  
+
   def createLieferplanung(meta: EventMetadata, id: LieferplanungId, lieferplanung: LieferplanungModify)(implicit userId: UserId = meta.originator) = {
     val insert = copyTo[LieferplanungModify, Lieferplanung](lieferplanung, "id" -> id,
       "status" -> Offen,

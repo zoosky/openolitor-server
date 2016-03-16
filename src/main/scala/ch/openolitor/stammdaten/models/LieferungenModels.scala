@@ -96,7 +96,7 @@ case class LieferungModify(
   anzahlLieferungen: Int,
   preisTotal: BigDecimal,
   lieferplanungId: Option[LieferplanungId],
-  lieferplanungNr: Option[Int])
+  lieferplanungNr: Option[Int]) extends JSONSerializable
 
 //case class LieferungModify(datum: DateTime) extends JSONSerializable
 

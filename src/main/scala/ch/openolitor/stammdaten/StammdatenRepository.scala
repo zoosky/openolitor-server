@@ -298,7 +298,11 @@ class StammdatenReadRepositoryImpl extends StammdatenReadRepository with LazyLog
     withSQL {
       select
         .from(lieferungMapping as lieferung)
+<<<<<<< 40f7ee91dd7359d9c6db6d6e24b3f136eac2e6e9
         .where.eq(lieferung.abotypId, parameter(abotypId)).and.eq(lieferung.vertriebsartId, parameter(vertriebsartId)).and.isNotNull(lieferung.lieferplanungId)
+=======
+        .where.eq(lieferung.abotypId, parameter(abotypId)).and.eq(lieferung.vertriebsartId, parameter(vertriebsartId)).and.not.eq(lieferung.lieferplanungId, parameter(None))
+>>>>>>> OO-96
         .orderBy(lieferung.datum)
     }.map(lieferungMapping(lieferung)).list.future
   }

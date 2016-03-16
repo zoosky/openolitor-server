@@ -129,7 +129,6 @@ trait StammdatenDBMappings extends DBMappings {
   implicit val produktProduzentIdIdSqlBinder = baseIdSqlBinder[ProduktProduzentId]
   implicit val produktProduktekategorieIdIdSqlBinder = baseIdSqlBinder[ProduktProduktekategorieId]
   implicit val lieferplanungIdOptionBinder = optionSqlBinder[LieferplanungId]
-
   implicit val stringSeqSqlBinder = seqSqlBinder[String]
 
   implicit val abotypMapping = new BaseEntitySQLSyntaxSupport[Abotyp] {
