@@ -26,10 +26,12 @@ sealed trait Waehrung
 case object CHF extends Waehrung
 case object EUR extends Waehrung
 case object USD extends Waehrung
+case object GBP extends Waehrung
+case object CAD extends Waehrung
 
 object Waehrung {
   def apply(value: String): Waehrung = {
-    Vector(CHF, EUR, USD).find(_.toString == value).getOrElse(CHF)
+    Vector(CHF, EUR, USD, GBP, CAD).find(_.toString == value).getOrElse(CHF)
   }
 }
 

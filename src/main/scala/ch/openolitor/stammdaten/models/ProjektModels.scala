@@ -39,6 +39,7 @@ case class Projekt(id: ProjektId,
   preiseSichtbar: Boolean = true,
   preiseEditierbar: Boolean = false,
   waehrung: Waehrung = CHF,
+  geschaeftsjahr: DateTime,
   //modification flags
   erstelldat: DateTime,
   ersteller: UserId,
@@ -54,7 +55,8 @@ case class ProjektModify(
   ort: Option[String],
   preiseSichtbar: Boolean = true,
   preiseEditierbar: Boolean = false,
-  waehrung: Waehrung = CHF) extends JSONSerializable
+  waehrung: Waehrung = CHF,
+  geschaeftsjahr: DateTime) extends JSONSerializable
 
 case class KundentypId(id: String)
 

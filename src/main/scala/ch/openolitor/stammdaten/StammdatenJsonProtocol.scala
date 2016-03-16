@@ -79,6 +79,10 @@ trait StammdatenJsonProtocol extends BaseJsonProtocol with LazyLogging with Auto
   implicit val personIdFormat = baseIdFormat(PersonId)
   implicit val aboIdFormat = baseIdFormat(AboId)
   implicit val lieferungIdFormat = baseIdFormat(LieferungId)
+  implicit val lieferplanungIdFormat = baseIdFormat(LieferplanungId)
+  implicit val lieferpositionIdFormat = baseIdFormat(LieferpositionId)
+  implicit val bestellungIdFormat = baseIdFormat(BestellungId)
+  implicit val bestellpositionIdFormat = baseIdFormat(BestellpositionId)
   implicit val customKundentypIdFormat = baseIdFormat(CustomKundentypId.apply)
   implicit val kundentypIdFormat = new RootJsonFormat[KundentypId] {
     def write(obj: KundentypId): JsValue =
@@ -199,8 +203,9 @@ trait StammdatenJsonProtocol extends BaseJsonProtocol with LazyLogging with Auto
 
     def read(json: JsValue): E = defaultFormat.read(json)
   }
-
+  
   implicit val abotypFormat = enhanceWithBooleanFlag("aktiv")(jsonFormat22(Abotyp))
+  implicit val abotypModifyFormat = jsonFormat14(AbotypModify)
 
   implicit val systemKundentypFormat = new JsonFormat[SystemKundentyp] {
     def write(obj: SystemKundentyp): JsValue =
@@ -279,7 +284,27 @@ trait StammdatenJsonProtocol extends BaseJsonProtocol with LazyLogging with Auto
       case pt => sys.error(s"Unknown anrede:$pt")
     }
   }
+
+  implicit val pendenzModifyFormat = jsonFormat4(PendenzModify)
+  implicit val kundeSummaryFormat = jsonFormat2(KundeSummary)
+  implicit val kundentypCreateFormat = jsonFormat2(CustomKundentypCreate)
+  implicit val kundentypModifyFormat = jsonFormat1(CustomKundentypModify)
+
+  implicit val lieferungAbotypCreateFormat = jsonFormat9(LieferungAbotypCreate)
+  implicit val lieferungModifyFormat = jsonFormat12(LieferungModify)
+  implicit val lieferplanungModifyFormat = jsonFormat3(LieferplanungModify)
+  implicit val lieferplanungCreateFormat = jsonFormat2(LieferplanungCreate)
+  implicit val lieferpositionModifyFormat = jsonFormat10(LieferpositionModify)
+  implicit val bestellungModifyFormat = jsonFormat7(BestellungModify)
+  implicit val bestellungenCreateFormat = jsonFormat1(BestellungenCreate)
+  implicit val bestellpositionModifyFormat = jsonFormat8(BestellpositionModify)
+
+  implicit val produktekategorieModifyFormat = jsonFormat1(ProduktekategorieModify)
+
+  implicit val produzentModifyFormat = jsonFormat18(ProduzentModify)
   
- implicit val projektFormat = jsonFormat14(Projekt)
- implicit val projektModifyFormat = jsonFormat9(ProjektModify)
+  implicit val produktModifyFormat = jsonFormat8(ProduktModify)
+  
+  implicit val projektFormat = jsonFormat15(Projekt)
+  implicit val projektModifyFormat = jsonFormat10(ProjektModify)
 }

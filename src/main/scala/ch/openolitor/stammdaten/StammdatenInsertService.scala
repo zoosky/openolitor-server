@@ -150,6 +150,8 @@ class StammdatenInsertService(override val sysConfig: SystemConfig) extends Even
     val insert = copyTo[LieferungAbotypCreate, Lieferung](lieferung, "id" -> id,
       "anzahlAbwesenheiten" -> ZERO,
       "status" -> Offen,
+      "lieferplanungId" -> None,
+      "lieferplanungNr" -> None,
       "erstelldat" -> meta.timestamp,
       "ersteller" -> meta.originator,
       "modifidat" -> meta.timestamp,
@@ -158,6 +160,20 @@ class StammdatenInsertService(override val sysConfig: SystemConfig) extends Even
     DB autoCommit { implicit session =>
       //create lieferung
       writeRepository.insertEntity[Lieferung, LieferungId](insert)
+    }
+  }
+  
+  def createLieferplanung(meta: EventMetadata, id: LieferplanungId, lieferplanung: LieferplanungModify)(implicit userId: UserId = meta.originator) = {
+    val insert = copyTo[LieferplanungModify, Lieferplanung](lieferplanung, "id" -> id,
+      "status" -> Offen,
+      "erstelldat" -> meta.timestamp,
+      "ersteller" -> meta.originator,
+      "modifidat" -> meta.timestamp,
+      "modifikator" -> meta.originator)
+
+    DB autoCommit { implicit session =>
+      //create lieferplanung
+      writeRepository.insertEntity[Lieferplanung, LieferplanungId](insert)
     }
   }
 

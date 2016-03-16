@@ -95,6 +95,18 @@ class DBEvent2UserMapping extends Actor with ActorLogging with ClientReceiver wi
 
     case e @ EntityCreated(userId, entity: Lieferung) => send(userId, e.asInstanceOf[DBEvent[Lieferung]])
     case e @ EntityDeleted(userId, entity: Lieferung) => send(userId, e.asInstanceOf[DBEvent[Lieferung]])
+    
+    case e @ EntityCreated(userId, entity: Lieferplanung) => send(userId, e.asInstanceOf[DBEvent[Lieferplanung]])
+    case e @ EntityDeleted(userId, entity: Lieferplanung) => send(userId, e.asInstanceOf[DBEvent[Lieferplanung]])
+    
+    case e @ EntityCreated(userId, entity: Lieferposition) => send(userId, e.asInstanceOf[DBEvent[Lieferposition]])
+    case e @ EntityDeleted(userId, entity: Lieferposition) => send(userId, e.asInstanceOf[DBEvent[Lieferposition]])
+    
+    case e @ EntityCreated(userId, entity: Bestellung) => send(userId, e.asInstanceOf[DBEvent[Bestellung]])
+    case e @ EntityDeleted(userId, entity: Bestellung) => send(userId, e.asInstanceOf[DBEvent[Bestellung]])
+    
+    case e @ EntityCreated(userId, entity: Bestellposition) => send(userId, e.asInstanceOf[DBEvent[Bestellposition]])
+    case e @ EntityDeleted(userId, entity: Bestellposition) => send(userId, e.asInstanceOf[DBEvent[Bestellposition]])
 
     case e @ EntityCreated(userId, entity: Depotlieferung) => send(userId, e.asInstanceOf[DBEvent[Depotlieferung]])
     case e @ EntityModified(userId, entity: Depotlieferung, _) => send(userId, e.asInstanceOf[DBEvent[Depotlieferung]])

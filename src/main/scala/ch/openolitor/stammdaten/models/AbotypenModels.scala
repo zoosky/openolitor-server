@@ -110,10 +110,11 @@ case class Abotyp(id: AbotypId,
   laufzeit: Option[Int],
   laufzeiteinheit: Laufzeiteinheit,
   anzahlAbwesenheiten: Option[Int],
-  farbCode: String,
+  //farbCode: String,
   zielpreis: Option[BigDecimal],
   saldoMindestbestand: Int,
   adminProzente: BigDecimal,
+  wirdGeplant: Boolean,
   //Zusatzinformationen
   anzahlAbonnenten: Int,
   letzteLieferung: Option[DateTime],
@@ -137,7 +138,9 @@ case class AbotypModify(
   laufzeit: Option[Int],
   laufzeiteinheit: Laufzeiteinheit,
   anzahlAbwesenheiten: Option[Int],
-  farbCode: String,
+  //farbCode: String,
   zielpreis: Option[BigDecimal],
   saldoMindestbestand: Int,
-  adminProzente: BigDecimal) extends AktivRange with JSONSerializable
+  adminProzente: BigDecimal,
+  wirdGeplant: Boolean = true
+  ) extends AktivRange with JSONSerializable
