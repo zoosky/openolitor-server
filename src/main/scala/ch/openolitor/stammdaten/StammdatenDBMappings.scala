@@ -335,6 +335,8 @@ trait StammdatenDBMappings extends DBMappings {
     override def updateParameters(bestellung: Bestellung) = {
       super.updateParameters(bestellung) ++ Seq(column.produzentId -> parameter(bestellung.produzentId),
           column.produzentKurzzeichen -> parameter(bestellung.produzentKurzzeichen),
+          column.lieferplanungId -> parameter(bestellung.lieferplanungId),
+          column.lieferplanungNr -> parameter(bestellung.lieferplanungNr),
           column.datumAbrechnung -> parameter(bestellung.datumAbrechnung),
           column.preisTotal -> parameter(bestellung.preisTotal))
     }

@@ -302,7 +302,6 @@ trait StammdatenJsonProtocol extends BaseJsonProtocol with LazyLogging with Auto
   implicit val bestellpositionModifyFormat = jsonFormat8(BestellpositionModify)
 
   implicit val produktekategorieModifyFormat = jsonFormat1(ProduktekategorieModify)
-
   implicit val produzentModifyFormat = jsonFormat18(ProduzentModify)
   
   implicit val produktModifyFormat = jsonFormat8(ProduktModify)

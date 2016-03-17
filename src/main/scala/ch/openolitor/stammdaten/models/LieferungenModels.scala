@@ -180,7 +180,7 @@ case class Bestellposition(id: BestellpositionId,
   produktBeschrieb: String,
   preisEinheit: Option[BigDecimal],
   einheit: Liefereinheit,
-  menge: Option[BigDecimal],
+  menge: BigDecimal,
   preis: Option[BigDecimal],
   anzahl: Int,
   //modification flags
@@ -195,7 +195,7 @@ case class BestellpositionModify(
   produktBeschrieb: String,
   preisEinheit: Option[BigDecimal],
   einheit: Liefereinheit,
-  menge: Option[BigDecimal],
+  menge: BigDecimal,
   preis: Option[BigDecimal],
   anzahl: Int
   ) extends JSONSerializable
