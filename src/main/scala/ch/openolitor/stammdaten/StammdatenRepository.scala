@@ -89,8 +89,6 @@ trait StammdatenReadRepository {
   
   def getLieferplanungen(implicit context: ExecutionContext, asyncCpContext: MultipleAsyncConnectionPoolContext): Future[List[Lieferplanung]]
   def getLieferplanung(id: LieferplanungId)(implicit context: ExecutionContext, asyncCpContext: MultipleAsyncConnectionPoolContext): Future[Option[Lieferplanung]]
-<<<<<<< 83299d71839b761b14edc9d376713f9c9d833e13
-<<<<<<< 99b8092c212e369d6960ce995a9b5fc96a28fe6c
   def getLatestLieferplanung(implicit context: ExecutionContext, asyncCpContext: MultipleAsyncConnectionPoolContext): Future[Option[Lieferplanung]]
   def getLieferungenNext()(implicit context: ExecutionContext, asyncCpContext: MultipleAsyncConnectionPoolContext): Future[List[Lieferung]]
   def getLieferungen(id: LieferplanungId)(implicit context: ExecutionContext, asyncCpContext: MultipleAsyncConnectionPoolContext): Future[List[Lieferung]]
@@ -101,15 +99,6 @@ trait StammdatenReadRepository {
   def getBestellpositionen(id: BestellungId)(implicit context: ExecutionContext, asyncCpContext: MultipleAsyncConnectionPoolContext): Future[List[Bestellposition]]
   def getBestellpositionenByLieferplan(id: LieferplanungId)(implicit context: ExecutionContext, asyncCpContext: MultipleAsyncConnectionPoolContext): Future[List[Bestellposition]]
   def getBestellpositionByBestellungProdukt(bestellungId: BestellungId, produktId: ProduktId)(implicit context: ExecutionContext, asyncCpContext: MultipleAsyncConnectionPoolContext): Future[Option[Bestellposition]]
-=======
-=======
-  def getLatestLieferplanung(implicit context: ExecutionContext, asyncCpContext: MultipleAsyncConnectionPoolContext): Future[Option[Lieferplanung]]
->>>>>>> OO-96 Insert Funktionen (createBestellungen nicht implementiert)
-  def getLieferungen(id: LieferplanungId)(implicit context: ExecutionContext, asyncCpContext: MultipleAsyncConnectionPoolContext): Future[List[Lieferung]]
-  def getBestellungen(id: LieferplanungId)(implicit context: ExecutionContext, asyncCpContext: MultipleAsyncConnectionPoolContext): Future[List[Bestellung]]
-  def getBestellpositionen(id: BestellungId)(implicit context: ExecutionContext, asyncCpContext: MultipleAsyncConnectionPoolContext): Future[List[Bestellposition]]
-  
->>>>>>> OO-96 models und Read-Operationen
 }
 
 trait StammdatenWriteRepository extends BaseWriteRepository {
@@ -122,12 +111,7 @@ class StammdatenReadRepositoryImpl extends StammdatenReadRepository with LazyLog
   lazy val person = personMapping.syntax("pers")
   lazy val lieferplanung = lieferplanungMapping.syntax("lieferplanung")
   lazy val lieferung = lieferungMapping.syntax("lieferung")
-<<<<<<< 99b8092c212e369d6960ce995a9b5fc96a28fe6c
-  lazy val lieferplanung = lieferplanungMapping.syntax("lieferplanung")
   lazy val lieferposition = lieferpositionMapping.syntax("lieferposition")
-=======
-  lazy val lieferposition = lieferplanungMapping.syntax("lieferposition")
->>>>>>> OO-96 models und Read-Operationen
   lazy val bestellung = bestellungMapping.syntax("bestellung")
   lazy val bestellposition = bestellpositionMapping.syntax("bestellposition")
   lazy val kunde = kundeMapping.syntax("kunde")
@@ -314,11 +298,7 @@ class StammdatenReadRepositoryImpl extends StammdatenReadRepository with LazyLog
     withSQL {
       select
         .from(lieferungMapping as lieferung)
-<<<<<<< 40f7ee91dd7359d9c6db6d6e24b3f136eac2e6e9
         .where.eq(lieferung.abotypId, parameter(abotypId)).and.eq(lieferung.vertriebsartId, parameter(vertriebsartId)).and.isNotNull(lieferung.lieferplanungId)
-=======
-        .where.eq(lieferung.abotypId, parameter(abotypId)).and.eq(lieferung.vertriebsartId, parameter(vertriebsartId)).and.not.eq(lieferung.lieferplanungId, parameter(None))
->>>>>>> OO-96
         .orderBy(lieferung.datum)
     }.map(lieferungMapping(lieferung)).list.future
   }
@@ -515,7 +495,6 @@ class StammdatenReadRepositoryImpl extends StammdatenReadRepository with LazyLog
         .from(lieferplanungMapping as lieferplanung)
     }.map(lieferplanungMapping(lieferplanung)).list.future
   }
-<<<<<<< 99b8092c212e369d6960ce995a9b5fc96a28fe6c
 
   def getLatestLieferplanung(implicit context: ExecutionContext, asyncCpContext: MultipleAsyncConnectionPoolContext): Future[Option[Lieferplanung]] = {
     withSQL {
@@ -526,21 +505,6 @@ class StammdatenReadRepositoryImpl extends StammdatenReadRepository with LazyLog
     }.map(lieferplanungMapping(lieferplanung)).single.future
   }
 
-=======
-  
-<<<<<<< 83299d71839b761b14edc9d376713f9c9d833e13
->>>>>>> OO-96 models und Read-Operationen
-=======
-  def getLatestLieferplanung(implicit context: ExecutionContext, asyncCpContext: MultipleAsyncConnectionPoolContext): Future[Option[Lieferplanung]] = {
-    withSQL {
-      select
-        .from(lieferplanungMapping as lieferplanung)
-        .orderBy(lieferplanung.nr).desc
-        .limit(1)
-    }.map(lieferplanungMapping(lieferplanung)).single.future
-  }
-  
->>>>>>> OO-96 Insert Funktionen (createBestellungen nicht implementiert)
   def getLieferplanung(id: LieferplanungId)(implicit context: ExecutionContext, asyncCpContext: MultipleAsyncConnectionPoolContext): Future[Option[Lieferplanung]] = {
     withSQL {
       select
@@ -549,7 +513,6 @@ class StammdatenReadRepositoryImpl extends StammdatenReadRepository with LazyLog
     }.map(lieferplanungMapping(lieferplanung)).single.future
   }
   
-<<<<<<< 99b8092c212e369d6960ce995a9b5fc96a28fe6c
   def getLieferungenNext()(implicit context: ExecutionContext, asyncCpContext: MultipleAsyncConnectionPoolContext): Future[List[Lieferung]] = {
     withSQL {
       select
@@ -559,8 +522,6 @@ class StammdatenReadRepositoryImpl extends StammdatenReadRepository with LazyLog
     }.map(lieferungMapping(lieferung)).list.future
   }
 
-=======
->>>>>>> OO-96 models und Read-Operationen
   def getLieferungen(id: LieferplanungId)(implicit context: ExecutionContext, asyncCpContext: MultipleAsyncConnectionPoolContext): Future[List[Lieferung]] = {
     withSQL {
       select
@@ -568,11 +529,7 @@ class StammdatenReadRepositoryImpl extends StammdatenReadRepository with LazyLog
         .where.eq(lieferung.lieferplanungId, parameter(id))
     }.map(lieferungMapping(lieferung)).list.future
   }
-<<<<<<< 99b8092c212e369d6960ce995a9b5fc96a28fe6c
 
-=======
-  
->>>>>>> OO-96 models und Read-Operationen
   def getBestellungen(id: LieferplanungId)(implicit context: ExecutionContext, asyncCpContext: MultipleAsyncConnectionPoolContext): Future[List[Bestellung]] = {
     withSQL {
       select
@@ -580,7 +537,6 @@ class StammdatenReadRepositoryImpl extends StammdatenReadRepository with LazyLog
         .where.eq(bestellung.lieferplanungId, parameter(id))
     }.map(bestellungMapping(bestellung)).list.future
   }
-<<<<<<< 99b8092c212e369d6960ce995a9b5fc96a28fe6c
 
   def getBestellungByProduzentLieferplanungDatum(produzentId: ProduzentId, lieferplanungId: LieferplanungId, datum: DateTime)(implicit context: ExecutionContext, asyncCpContext: MultipleAsyncConnectionPoolContext): Future[Option[Bestellung]] = {
     withSQL {
@@ -592,9 +548,6 @@ class StammdatenReadRepositoryImpl extends StammdatenReadRepository with LazyLog
     }.map(bestellungMapping(bestellung)).single.future
   }
 
-=======
-  
->>>>>>> OO-96 models und Read-Operationen
   def getBestellpositionen(id: BestellungId)(implicit context: ExecutionContext, asyncCpContext: MultipleAsyncConnectionPoolContext): Future[List[Bestellposition]] = {
     withSQL {
       select
@@ -602,7 +555,6 @@ class StammdatenReadRepositoryImpl extends StammdatenReadRepository with LazyLog
         .where.eq(bestellposition.bestellungId, parameter(id))
     }.map(bestellpositionMapping(bestellposition)).list.future
   }
-<<<<<<< 99b8092c212e369d6960ce995a9b5fc96a28fe6c
 
   def getBestellpositionenByLieferplan(id: LieferplanungId)(implicit context: ExecutionContext, asyncCpContext: MultipleAsyncConnectionPoolContext): Future[List[Bestellposition]] = {
     withSQL {
@@ -638,8 +590,6 @@ class StammdatenReadRepositoryImpl extends StammdatenReadRepository with LazyLog
         .where.eq(lieferung.lieferplanungId, parameter(id))
     }.map(lieferpositionMapping(lieferposition)).list.future
   }
-=======
->>>>>>> OO-96 models und Read-Operationen
 
 }
 
