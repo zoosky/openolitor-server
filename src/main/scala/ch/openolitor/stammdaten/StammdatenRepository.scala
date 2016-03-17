@@ -89,6 +89,7 @@ trait StammdatenReadRepository {
   
   def getLieferplanungen(implicit context: ExecutionContext, asyncCpContext: MultipleAsyncConnectionPoolContext): Future[List[Lieferplanung]]
   def getLieferplanung(id: LieferplanungId)(implicit context: ExecutionContext, asyncCpContext: MultipleAsyncConnectionPoolContext): Future[Option[Lieferplanung]]
+<<<<<<< 83299d71839b761b14edc9d376713f9c9d833e13
 <<<<<<< 99b8092c212e369d6960ce995a9b5fc96a28fe6c
   def getLatestLieferplanung(implicit context: ExecutionContext, asyncCpContext: MultipleAsyncConnectionPoolContext): Future[Option[Lieferplanung]]
   def getLieferungenNext()(implicit context: ExecutionContext, asyncCpContext: MultipleAsyncConnectionPoolContext): Future[List[Lieferung]]
@@ -101,6 +102,9 @@ trait StammdatenReadRepository {
   def getBestellpositionenByLieferplan(id: LieferplanungId)(implicit context: ExecutionContext, asyncCpContext: MultipleAsyncConnectionPoolContext): Future[List[Bestellposition]]
   def getBestellpositionByBestellungProdukt(bestellungId: BestellungId, produktId: ProduktId)(implicit context: ExecutionContext, asyncCpContext: MultipleAsyncConnectionPoolContext): Future[Option[Bestellposition]]
 =======
+=======
+  def getLatestLieferplanung(implicit context: ExecutionContext, asyncCpContext: MultipleAsyncConnectionPoolContext): Future[Option[Lieferplanung]]
+>>>>>>> OO-96 Insert Funktionen (createBestellungen nicht implementiert)
   def getLieferungen(id: LieferplanungId)(implicit context: ExecutionContext, asyncCpContext: MultipleAsyncConnectionPoolContext): Future[List[Lieferung]]
   def getBestellungen(id: LieferplanungId)(implicit context: ExecutionContext, asyncCpContext: MultipleAsyncConnectionPoolContext): Future[List[Bestellung]]
   def getBestellpositionen(id: BestellungId)(implicit context: ExecutionContext, asyncCpContext: MultipleAsyncConnectionPoolContext): Future[List[Bestellposition]]
@@ -524,7 +528,19 @@ class StammdatenReadRepositoryImpl extends StammdatenReadRepository with LazyLog
 
 =======
   
+<<<<<<< 83299d71839b761b14edc9d376713f9c9d833e13
 >>>>>>> OO-96 models und Read-Operationen
+=======
+  def getLatestLieferplanung(implicit context: ExecutionContext, asyncCpContext: MultipleAsyncConnectionPoolContext): Future[Option[Lieferplanung]] = {
+    withSQL {
+      select
+        .from(lieferplanungMapping as lieferplanung)
+        .orderBy(lieferplanung.nr).desc
+        .limit(1)
+    }.map(lieferplanungMapping(lieferplanung)).single.future
+  }
+  
+>>>>>>> OO-96 Insert Funktionen (createBestellungen nicht implementiert)
   def getLieferplanung(id: LieferplanungId)(implicit context: ExecutionContext, asyncCpContext: MultipleAsyncConnectionPoolContext): Future[Option[Lieferplanung]] = {
     withSQL {
       select
