@@ -555,7 +555,7 @@ class StammdatenReadRepositoryImpl extends StammdatenReadRepository with LazyLog
         .where.eq(bestellposition.bestellungId, parameter(id))
     }.map(bestellpositionMapping(bestellposition)).list.future
   }
-
+  
   def getBestellpositionenByLieferplan(id: LieferplanungId)(implicit context: ExecutionContext, asyncCpContext: MultipleAsyncConnectionPoolContext): Future[List[Bestellposition]] = {
     withSQL {
       select

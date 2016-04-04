@@ -1,0 +1,13 @@
+docker run -it cloudfoundry/cflinuxfs2 bash
+
+im docker:
+
+apt-get install libreoffice-core
+apt-get install libreoffice-writer
+
+
+wget https://www.oasis-open.org/committees/download.php/31636/TestDocumentTypes-wd-1.odt
+
+libreoffice --headless --convert-to pdf TestDocumentTypes-wd-1.odt
+
+

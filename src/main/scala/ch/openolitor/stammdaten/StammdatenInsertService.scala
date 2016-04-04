@@ -242,8 +242,20 @@ class StammdatenInsertService(override val sysConfig: SystemConfig) extends Even
   }
 
   def createBestellungen(id: UUID, create: BestellungenCreate) = {
-    //delete all Bestellpositionen from Bestellungen (Bestellungen are maintained even if nothing is added) 
-    //fetch corresponding Lieferungen and generate Bestellungen
+    DB autoCommit { implicit session =>
+      //delete all Bestellpositionen from Bestellungen (Bestellungen are maintained even if nothing is added)
+      readRepository.getBestellpositionenByLieferplan(create.lieferplanungId) map { _ map { 
+          position => writeRepository.deleteEntity[Bestellposition, BestellpositionId](position.id)
+        }
+      } andThen {
+      //fetch corresponding Lieferungen and generate Bestellungen
+        readRepository.getLieferpositionenByLieferplan(create.lieferplanungId) map {
+          lieferposition => {
+            readRepository.getLieferpositionenByLieferant(lieferposition.lieferantId)
+          }
+        }
+      }
+    }
   }
 
   def createKunde(meta: EventMetadata, id: KundeId, create: KundeModify)(implicit userId: UserId = meta.originator) = {
