@@ -43,7 +43,7 @@ object StammdatenInsertService {
 }
 
 class DefaultStammdatenInsertService(sysConfig: SystemConfig, override val system: ActorSystem)
-  extends StammdatenInsertService(sysConfig) with DefaultStammdatenRepositoryComponent {
+    extends StammdatenInsertService(sysConfig) with DefaultStammdatenRepositoryComponent {
 }
 
 /**
@@ -87,6 +87,10 @@ class StammdatenInsertService(override val sysConfig: SystemConfig) extends Even
       createTour(meta, id, tour)
     case EntityInsertedEvent(meta, id: ProjektId, projekt: ProjektModify) =>
       createProjekt(meta, id, projekt)
+    case EntityInsertedEvent(meta, id, lieferplanungCreateData: LieferplanungCreate) =>
+      createLieferplanung(id, lieferplanungCreateData)
+    case EntityInsertedEvent(meta, id, bestellungCreateData: BestellungenCreate) =>
+      createBestellungen(id, bestellungCreateData)
     case EntityInsertedEvent(meta, id, entity) =>
       logger.debug(s"Receive unmatched insert event for entity:$entity with id:$id")
     case e =>
@@ -160,6 +164,25 @@ class StammdatenInsertService(override val sysConfig: SystemConfig) extends Even
     DB autoCommit { implicit session =>
       //create lieferung
       writeRepository.insertEntity[Lieferung, LieferungId](insert)
+    }
+  }
+
+  def createLieferplanung(id: UUID, lieferplanung: LieferplanungCreate) = {
+    val lieferplanungId = LieferplanungId(id)
+    val insert = readRepository.getLatestLieferplanung map {
+      case Some(latestLP) => {
+        val newNr = latestLP.nr + 1
+        copyTo[LieferplanungCreate, Lieferplanung](lieferplanung, "id" -> lieferplanungId,
+          "nr" -> newNr)
+      }
+      case None => {
+        val firstNr = 1
+        copyTo[LieferplanungCreate, Lieferplanung](lieferplanung, "id" -> lieferplanungId,
+          "nr" -> firstNr)
+          
+  DB autoCommit { implicit session =>
+      //create lieferplanung
+      writeRepository.insertEntity[Lieferplanung, LieferplanungId](insert)
     }
   }
 
@@ -244,15 +267,65 @@ class StammdatenInsertService(override val sysConfig: SystemConfig) extends Even
   def createBestellungen(id: UUID, create: BestellungenCreate) = {
     DB autoCommit { implicit session =>
       //delete all Bestellpositionen from Bestellungen (Bestellungen are maintained even if nothing is added)
-      readRepository.getBestellpositionenByLieferplan(create.lieferplanungId) map { _ map { 
+      readRepository.getBestellpositionenByLieferplan(create.lieferplanungId) map {
+        _ map {
           position => writeRepository.deleteEntity[Bestellposition, BestellpositionId](position.id)
         }
       } andThen {
-      //fetch corresponding Lieferungen and generate Bestellungen
-        readRepository.getLieferpositionenByLieferplan(create.lieferplanungId) map {
-          lieferposition => {
-            readRepository.getLieferpositionenByLieferant(lieferposition.lieferantId)
-          }
+        //fetch corresponding Lieferungen and generate Bestellungen
+        val test = readRepository.getLieferplanung(create.lieferplanungId) map {
+          case None => { List.empty[Option[Bestellposition]] }
+          case Some(lieferplanung) =>
+            readRepository.getLieferpositionenByLieferplan(create.lieferplanungId) map {
+              _ map {
+                lieferposition =>
+                  {
+                    writeRepository.getById(lieferungMapping, lieferposition.lieferungId) map { lieferung =>
+                      // fetch or create bestellung by produzent
+                      readRepository.getBestellungByProduzentLieferplanungDatum(lieferposition.produzentId, create.lieferplanungId, lieferung.datum) map {
+                        case Some(existingBest) => {
+                          existingBest
+                        }
+                        case None => {
+                          //create bestellung
+                          val bestellung = Bestellung(BestellungId(UUID.randomUUID()), lieferposition.produzentId, lieferposition.produzentKurzzeichen, lieferplanung.id, lieferplanung.nr, lieferung.datum, None, 0)
+                          writeRepository.insertEntity(bestellung)
+                          bestellung
+                        }
+                      } map { bestellung =>
+                        //fetch or create bestellposition by produkt
+                        readRepository.getBestellpositionByBestellungProdukt(bestellung.id, lieferposition.produktId) map {
+                          case Some(existingBP) => {
+                            val newMenge = existingBP.menge + lieferposition.menge.get
+                            val newPreis = Some(existingBP.preis.get + lieferposition.preis.get)
+                            val newAnzahl = (existingBP.anzahl + lieferposition.anzahl)
+                            val copyBP = copyTo[Bestellposition, Bestellposition](existingBP, 
+                              "menge" -> newMenge, 
+                              "preis" -> newPreis,
+                              "anzahl" -> newAnzahl)
+                            writeRepository.updateEntity[Bestellposition, BestellpositionId](copyBP)
+                            copyBP
+                          }
+                          case None => {
+                            //create bestellposition
+                            val bestellposition = Bestellposition(BestellpositionId(UUID.randomUUID()),
+                              bestellung.id,
+                              lieferposition.produktId,
+                              lieferposition.produktBeschrieb,
+                              lieferposition.preisEinheit,
+                              lieferposition.einheit,
+                              lieferposition.menge.get,
+                              lieferposition.preis,
+                              lieferposition.anzahl)
+                            writeRepository.insertEntity(bestellposition)
+                            bestellposition
+                          }
+                        }
+                      }
+                    }
+                  }
+              }
+            }
         }
       }
     }
@@ -293,7 +366,8 @@ class StammdatenInsertService(override val sysConfig: SystemConfig) extends Even
 
   def createPendenz(meta: EventMetadata, id: PendenzId, create: PendenzModify, kundeId: KundeId, kundeBezeichnung: String)(implicit userId: UserId = meta.originator) = {
     val pendenz = copyTo[PendenzModify, Pendenz](create, "id" -> id,
-      "kundeId" -> kundeId, "kundeBezeichnung" -> kundeBezeichnung,
+      "kundeId" -> kundeId, 
+      "kundeBezeichnung" -> kundeBezeichnung,
       "erstelldat" -> meta.timestamp,
       "ersteller" -> meta.originator,
       "modifidat" -> meta.timestamp,

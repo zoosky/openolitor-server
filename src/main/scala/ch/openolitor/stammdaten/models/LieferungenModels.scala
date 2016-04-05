@@ -131,7 +131,7 @@ case class Lieferposition(id: LieferpositionId,
   modifikator: UserId) extends BaseEntity[LieferpositionId]
 
 case class LieferpositionModify(
-  lieferungId: LieferungId, 
+  lieferungId: LieferungId,
   produktId: ProduktId,
   produktBeschrieb: String,
   produzentId: ProduzentId,

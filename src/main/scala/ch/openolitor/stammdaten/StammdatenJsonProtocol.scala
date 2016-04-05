@@ -308,5 +308,4 @@ trait StammdatenJsonProtocol extends BaseJsonProtocol with LazyLogging with Auto
   
   implicit val projektFormat = jsonFormat16(Projekt)
   implicit val projektModifyFormat = jsonFormat11(ProjektModify)
-
 }
