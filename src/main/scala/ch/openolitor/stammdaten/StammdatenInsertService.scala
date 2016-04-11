@@ -22,6 +22,8 @@
 \*                                                                           */
 package ch.openolitor.stammdaten
 
+import scalaz._
+import Scalaz._
 import ch.openolitor.core._
 import ch.openolitor.core.db._
 import ch.openolitor.core.domain._
@@ -37,6 +39,8 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import ch.openolitor.core.models._
 import org.joda.time.DateTime
 import ch.openolitor.core.Macros._
+import shapeless.Tuple
+import org.joda.time.DateTime
 
 object StammdatenInsertService {
   def apply(implicit sysConfig: SystemConfig, system: ActorSystem): StammdatenInsertService = new DefaultStammdatenInsertService(sysConfig, system)
@@ -273,37 +277,36 @@ class StammdatenInsertService(override val sysConfig: SystemConfig) extends Even
         }
       } andThen {
         //fetch corresponding Lieferungen and generate Bestellungen
-        val test = readRepository.getLieferplanung(create.lieferplanungId) map {
-          case None => { List.empty[Option[Bestellposition]] }
+        val newBs = collection.mutable.Map[Tuple3[ProduzentId, LieferplanungId, DateTime], Bestellung]()
+        val newBPs = collection.mutable.Map[Tuple2[BestellungId, ProduktId], Bestellposition]()
+        readRepository.getLieferplanung(create.lieferplanungId) map {
           case Some(lieferplanung) =>
             readRepository.getLieferpositionenByLieferplan(create.lieferplanungId) map {
               _ map {
                 lieferposition =>
                   {
                     writeRepository.getById(lieferungMapping, lieferposition.lieferungId) map { lieferung =>
-                      // fetch or create bestellung by produzent
-                      readRepository.getBestellungByProduzentLieferplanungDatum(lieferposition.produzentId, create.lieferplanungId, lieferung.datum) map {
-                        case Some(existingBest) => {
-                          existingBest
-                        }
+                      // enhance or create bestellung by produzentT
+                      newBs.get((lieferposition.produzentId, create.lieferplanungId, lieferung.datum)) match {
                         case None => {
                           //create bestellung
                           val bestellung = Bestellung(BestellungId(UUID.randomUUID()), lieferposition.produzentId, lieferposition.produzentKurzzeichen, lieferplanung.id, lieferplanung.nr, lieferung.datum, None, 0)
-                          writeRepository.insertEntity(bestellung)
+                          newBs += (lieferposition.produzentId, create.lieferplanungId, lieferung.datum) -> bestellung
                           bestellung
                         }
-                      } map { bestellung =>
+                      } 
+                      
+                      newBs.get((lieferposition.produzentId, create.lieferplanungId, lieferung.datum)) map { bestellung =>
                         //fetch or create bestellposition by produkt
-                        readRepository.getBestellpositionByBestellungProdukt(bestellung.id, lieferposition.produktId) map {
+                        val bp = newBPs.get((bestellung.id, lieferposition.produktId)) match {
                           case Some(existingBP) => {
                             val newMenge = existingBP.menge + lieferposition.menge.get
-                            val newPreis = Some(existingBP.preis.get + lieferposition.preis.get)
-                            val newAnzahl = (existingBP.anzahl + lieferposition.anzahl)
+                            val newPreis = existingBP.preis |+| lieferposition.preis
+                            val newAnzahl = existingBP.anzahl + lieferposition.anzahl
                             val copyBP = copyTo[Bestellposition, Bestellposition](existingBP, 
                               "menge" -> newMenge, 
                               "preis" -> newPreis,
                               "anzahl" -> newAnzahl)
-                            writeRepository.updateEntity[Bestellposition, BestellpositionId](copyBP)
                             copyBP
                           }
                           case None => {
@@ -317,15 +320,25 @@ class StammdatenInsertService(override val sysConfig: SystemConfig) extends Even
                               lieferposition.menge.get,
                               lieferposition.preis,
                               lieferposition.anzahl)
-                            writeRepository.insertEntity(bestellposition)
                             bestellposition
                           }
                         }
+                        newBPs += (bestellung.id, lieferposition.produktId) -> bp
                       }
                     }
                   }
               }
             }
+        }
+        
+        //jetzt die neuen objekte kreieren
+        newBs foreach {
+          bestellung =>
+            writeRepository.insertEntity(bestellung._2)
+        }
+        newBPs foreach {
+          case( _, bestellposition) =>
+            writeRepository.insertEntity(bestellposition)
         }
       }
     }
