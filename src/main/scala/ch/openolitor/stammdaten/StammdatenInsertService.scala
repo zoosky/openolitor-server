@@ -323,7 +323,7 @@ class StammdatenInsertService(override val sysConfig: SystemConfig) extends Even
                         }
                       }
                       newBPs += (bestellung.id, lieferposition.produktId) -> bp
-                      val newPreisTotal = bestellung.preisTotal |+| bp.preis
+                      val newPreisTotal = bp.preis.get |+| bestellung.preisTotal
                       val copyB = copyTo[Bestellung, Bestellung](bestellung,
                             "preisTotal" -> newPreisTotal)
                     }

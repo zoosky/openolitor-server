@@ -390,7 +390,7 @@ object V1Scripts {
         ersteller BIGINT not null, 
         modifidat datetime not null, 
         modifikator BIGINT not null)""".execute.apply()
-
+      
       logger.debug(s"oo-system: cleanupDatabase - end")
       Success(true)
     }
