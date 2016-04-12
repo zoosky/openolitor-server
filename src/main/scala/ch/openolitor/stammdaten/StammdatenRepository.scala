@@ -86,7 +86,7 @@ trait StammdatenReadRepository {
   def getTouren(implicit context: ExecutionContext, asyncCpContext: MultipleAsyncConnectionPoolContext): Future[List[Tour]]
 
   def getProjekt(implicit context: ExecutionContext, asyncCpContext: MultipleAsyncConnectionPoolContext): Future[Option[Projekt]]
-  
+
   def getLieferplanungen(implicit context: ExecutionContext, asyncCpContext: MultipleAsyncConnectionPoolContext): Future[List[Lieferplanung]]
   def getLieferplanung(id: LieferplanungId)(implicit context: ExecutionContext, asyncCpContext: MultipleAsyncConnectionPoolContext): Future[Option[Lieferplanung]]
   def getLatestLieferplanung(implicit context: ExecutionContext, asyncCpContext: MultipleAsyncConnectionPoolContext): Future[Option[Lieferplanung]]
@@ -488,7 +488,7 @@ class StammdatenReadRepositoryImpl extends StammdatenReadRepository with LazyLog
         .where.like(produkt.kategorien, '%' + bezeichnung + '%')
     }.map(produktMapping(produkt)).list.future
   }
-  
+
   def getLieferplanungen(implicit context: ExecutionContext, asyncCpContext: MultipleAsyncConnectionPoolContext): Future[List[Lieferplanung]] = {
     withSQL {
       select
@@ -512,7 +512,7 @@ class StammdatenReadRepositoryImpl extends StammdatenReadRepository with LazyLog
         .where.eq(lieferplanung.id, parameter(id))
     }.map(lieferplanungMapping(lieferplanung)).single.future
   }
-  
+
   def getLieferungenNext()(implicit context: ExecutionContext, asyncCpContext: MultipleAsyncConnectionPoolContext): Future[List[Lieferung]] = {
     withSQL {
       select
@@ -555,7 +555,7 @@ class StammdatenReadRepositoryImpl extends StammdatenReadRepository with LazyLog
         .where.eq(bestellposition.bestellungId, parameter(id))
     }.map(bestellpositionMapping(bestellposition)).list.future
   }
-  
+
   def getBestellpositionenByLieferplan(id: LieferplanungId)(implicit context: ExecutionContext, asyncCpContext: MultipleAsyncConnectionPoolContext): Future[List[Bestellposition]] = {
     withSQL {
       select
@@ -563,23 +563,6 @@ class StammdatenReadRepositoryImpl extends StammdatenReadRepository with LazyLog
         .leftJoin(bestellungMapping as bestellung).on(bestellposition.bestellungId, bestellung.id)
         .where.eq(bestellung.lieferplanungId, parameter(id))
     }.map(bestellpositionMapping(bestellposition)).list.future
-  }
-  
-  def getLieferpositionenByLieferant(id: ProduzentId)(implicit context: ExecutionContext, asyncCpContext: MultipleAsyncConnectionPoolContext): Future[List[Lieferposition]] = {
-    withSQL {
-      select
-        .from(lieferpositionMapping as lieferposition)
-        .where.eq(lieferposition.produzentId, parameter(id))
-    }.map(lieferpositionMapping(lieferposition)).list.future
-  }
-  
-  def getBestellpositionByBestellungProdukt(bestellungId: BestellungId, produktId: ProduktId)(implicit context: ExecutionContext, asyncCpContext: MultipleAsyncConnectionPoolContext): Future[Option[Bestellposition]] = {
-    withSQL {
-      select
-        .from(bestellpositionMapping as bestellposition)
-        .where.eq(bestellposition.bestellungId, parameter(bestellungId))
-        .and.eq(bestellposition.produktId, parameter(produktId))
-    }.map(bestellpositionMapping(bestellposition)).single.future
   }
 
   def getLieferpositionenByLieferant(id: ProduzentId)(implicit context: ExecutionContext, asyncCpContext: MultipleAsyncConnectionPoolContext): Future[List[Lieferposition]] = {
@@ -611,7 +594,7 @@ class StammdatenReadRepositoryImpl extends StammdatenReadRepository with LazyLog
 }
 
 class StammdatenWriteRepositoryImpl(val system: ActorSystem) extends StammdatenWriteRepository with LazyLogging with EventStream with StammdatenDBMappings {
-  
+
   override def cleanupDatabase(implicit cpContext: ConnectionPoolContext) = {
 
   }
