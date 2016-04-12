@@ -38,13 +38,15 @@ case class Projekt(id: ProjektId,
   ort: Option[String],
   preiseSichtbar: Boolean = true,
   preiseEditierbar: Boolean = false,
+  emailErforderlich: Boolean = true,
   waehrung: Waehrung = CHF,
   geschaeftsjahr: DateTime,
   //modification flags
   erstelldat: DateTime,
   ersteller: UserId,
   modifidat: DateTime,
-  modifikator: UserId) extends BaseEntity[ProjektId]
+  modifikator: UserId
+) extends BaseEntity[ProjektId]
 
 case class ProjektModify(
   bezeichnung: String,
@@ -55,8 +57,10 @@ case class ProjektModify(
   ort: Option[String],
   preiseSichtbar: Boolean = true,
   preiseEditierbar: Boolean = false,
+  emailErforderlich: Boolean = true,
   waehrung: Waehrung = CHF,
-  geschaeftsjahr: DateTime) extends JSONSerializable
+  geschaeftsjahr: DateTime
+) extends JSONSerializable 
 
 case class KundentypId(id: String)
 

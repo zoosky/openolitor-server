@@ -150,10 +150,12 @@ trait StammdatenDBMappings extends DBMappings {
         column.preiseinheit -> parameter(abotyp.preiseinheit),
         //column.farbCode -> parameter(abotyp.farbCode),
         column.zielpreis -> parameter(abotyp.zielpreis),
+        column.saldoMindestbestand -> parameter(abotyp.saldoMindestbestand),
+        column.adminProzente ->parameter(abotyp.adminProzente),
+        column.wirdGeplant ->parameter(abotyp.wirdGeplant),
         column.anzahlAbonnenten -> parameter(abotyp.anzahlAbonnenten),
         column.letzteLieferung -> parameter(abotyp.letzteLieferung),
-        column.waehrung -> parameter(abotyp.waehrung),
-        column.saldoMindestbestand -> parameter(abotyp.saldoMindestbestand))
+        column.waehrung -> parameter(abotyp.waehrung))
     }
   }
 
@@ -613,7 +615,10 @@ trait StammdatenDBMappings extends DBMappings {
         column.ort -> parameter(projekt.ort),
         column.preiseSichtbar -> parameter(projekt.preiseSichtbar),
         column.preiseEditierbar -> parameter(projekt.preiseEditierbar),
-        column.waehrung -> parameter(projekt.waehrung))
+        column.emailErforderlich -> parameter(projekt.emailErforderlich),
+        column.waehrung -> parameter(projekt.waehrung),
+        column.geschaeftsjahr -> parameter(projekt.geschaeftsjahr)
+       )
     }
   }
 

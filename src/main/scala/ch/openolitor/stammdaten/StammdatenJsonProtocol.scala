@@ -207,6 +207,8 @@ trait StammdatenJsonProtocol extends BaseJsonProtocol with LazyLogging with Auto
   implicit val abotypFormat = enhanceWithBooleanFlag("aktiv")(jsonFormat22(Abotyp))
   implicit val abotypModifyFormat = jsonFormat14(AbotypModify)
 
+  implicit val abotypSummaryFormat = jsonFormat2(AbotypSummary)
+
   implicit val systemKundentypFormat = new JsonFormat[SystemKundentyp] {
     def write(obj: SystemKundentyp): JsValue =
       JsString(obj.productPrefix)
@@ -305,6 +307,7 @@ trait StammdatenJsonProtocol extends BaseJsonProtocol with LazyLogging with Auto
   
   implicit val produktModifyFormat = jsonFormat8(ProduktModify)
   
-  implicit val projektFormat = jsonFormat15(Projekt)
-  implicit val projektModifyFormat = jsonFormat10(ProjektModify)
+  implicit val projektFormat = jsonFormat16(Projekt)
+  implicit val projektModifyFormat = jsonFormat11(ProjektModify)
+
 }

@@ -143,4 +143,4 @@ case class AbotypModify(
   saldoMindestbestand: Int,
   adminProzente: BigDecimal,
   wirdGeplant: Boolean = true
-  ) extends AktivRange with JSONSerializable
+) extends AktivRange with JSONSerializable
