@@ -114,6 +114,7 @@ trait StammdatenEventStoreSerializer extends StammdatenJsonProtocol with EntityS
     lieferplanungModifyPersister,
     lieferplanungCreatePersister,
     lieferplanungIdPersister,
+    lieferplanungCreatePersister,
     lieferpositionModifyPersister,
     lieferpositionIdPersister,
     bestellungenCreatePersister,

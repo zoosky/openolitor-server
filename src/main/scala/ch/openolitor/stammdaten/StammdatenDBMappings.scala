@@ -36,6 +36,8 @@ import ch.openolitor.core.repositories.SqlBinder
 import ch.openolitor.stammdaten.models.PendenzStatus
 import ch.openolitor.core.repositories.BaseEntitySQLSyntaxSupport
 import ch.openolitor.core.scalax._
+import java.sql.ResultSet
+import scala.None
 
 //DB Model bindig
 trait StammdatenDBMappings extends DBMappings {
@@ -52,6 +54,7 @@ trait StammdatenDBMappings extends DBMappings {
   implicit val aboIdBinder: TypeBinder[AboId] = baseIdTypeBinder(AboId.apply _)
   implicit val lierferungIdBinder: TypeBinder[LieferungId] = baseIdTypeBinder(LieferungId.apply _)
   implicit val lieferplanungIdBinder: TypeBinder[LieferplanungId] = baseIdTypeBinder(LieferplanungId.apply _)
+  implicit val optionLieferplanungIdBinder: TypeBinder[Option[LieferplanungId]] = lieferplanungIdBinder.map(v => Option(v).map(_.asInstanceOf[LieferplanungId]))
   implicit val lieferpositionIdBinder: TypeBinder[LieferpositionId] = baseIdTypeBinder(LieferpositionId.apply _)
   implicit val bestellungIdBinder: TypeBinder[BestellungId] = baseIdTypeBinder(BestellungId.apply _)
   implicit val bestellpositionIdBinder: TypeBinder[BestellpositionId] = baseIdTypeBinder(BestellpositionId.apply _)
@@ -84,7 +87,8 @@ trait StammdatenDBMappings extends DBMappings {
 
   implicit val stringSeqTypeBinder: TypeBinder[Seq[String]] = string.map(s => s.split(",").map(c => c).toSeq)
 
-  //DB parameter binders for write and query operationsit
+  //DB parameter binders for write and query operations
+
   implicit val pendenzStatusBinder = toStringSqlBinder[PendenzStatus]
   implicit val rhytmusSqlBinder = toStringSqlBinder[Rhythmus]
   implicit val preiseinheitSqlBinder = toStringSqlBinder[Preiseinheit]
@@ -124,7 +128,8 @@ trait StammdatenDBMappings extends DBMappings {
   implicit val projektIdSqlBinder = baseIdSqlBinder[ProjektId]
   implicit val produktProduzentIdIdSqlBinder = baseIdSqlBinder[ProduktProduzentId]
   implicit val produktProduktekategorieIdIdSqlBinder = baseIdSqlBinder[ProduktProduktekategorieId]
-  implicit val lieferplanungIdOptionBinder = optionSqlBinder(baseIdSqlBinder[LieferplanungId])
+  implicit val lieferplanungIdOptionBinder = optionSqlBinder[LieferplanungId]
+
   implicit val stringSeqSqlBinder = seqSqlBinder[String]
 
   implicit val abotypMapping = new BaseEntitySQLSyntaxSupport[Abotyp] {
