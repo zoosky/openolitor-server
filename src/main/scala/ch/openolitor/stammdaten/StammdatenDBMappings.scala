@@ -88,7 +88,6 @@ trait StammdatenDBMappings extends DBMappings {
   implicit val stringSeqTypeBinder: TypeBinder[Seq[String]] = string.map(s => s.split(",").map(c => c).toSeq)
 
   //DB parameter binders for write and query operations
-
   implicit val pendenzStatusBinder = toStringSqlBinder[PendenzStatus]
   implicit val rhytmusSqlBinder = toStringSqlBinder[Rhythmus]
   implicit val preiseinheitSqlBinder = toStringSqlBinder[Preiseinheit]

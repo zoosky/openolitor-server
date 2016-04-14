@@ -176,93 +176,37 @@ class StammdatenInsertService(override val sysConfig: SystemConfig) extends Even
     val insert = readRepository.getLatestLieferplanung map {
       case Some(latestLP) => {
         val newNr = latestLP.nr + 1
-        copyTo[LieferplanungCreate, Lieferplanung](lieferplanung, "id" -> lieferplanungId,
+        val lp = copyTo[LieferplanungCreate, Lieferplanung](lieferplanung, "id" -> lieferplanungId,
           "nr" -> newNr)
+        (lp, newNr)
       }
       case None => {
         val firstNr = 1
-        copyTo[LieferplanungCreate, Lieferplanung](lieferplanung, "id" -> lieferplanungId,
+        val lp = copyTo[LieferplanungCreate, Lieferplanung](lieferplanung, "id" -> lieferplanungId,
           "nr" -> firstNr)
-          
-  DB autoCommit { implicit session =>
-      //create lieferplanung
-      writeRepository.insertEntity[Lieferplanung, LieferplanungId](insert)
-    }
-  }
-
-  def createBestellungen(meta: EventMetadata, id: LieferplanungId, create: BestellungenCreate)(implicit userId: UserId = meta.originator) = {
-    DB autoCommit { implicit session =>
-      //delete all Bestellpositionen from Bestellungen (Bestellungen are maintained even if nothing is added)
-      readRepository.getBestellpositionenByLieferplan(create.lieferplanungId) foreach {
-        _ foreach {
-          position => writeRepository.deleteEntity[Bestellposition, BestellpositionId](position.id)
-        }
+        (lp, firstNr)
       }
-      //fetch corresponding Lieferungen and generate Bestellungen
-      val newBs = collection.mutable.Map[Tuple3[ProduzentId, LieferplanungId, DateTime], Bestellung]()
-      val newBPs = collection.mutable.Map[Tuple2[BestellungId, ProduktId], Bestellposition]()
-      readRepository.getLieferplanung(create.lieferplanungId) map {
-        case Some(lieferplanung) =>
-          readRepository.getLieferpositionenByLieferplan(create.lieferplanungId) map {
-            _ map {
-              lieferposition =>
-                {
-                  writeRepository.getById(lieferungMapping, lieferposition.lieferungId) map { lieferung =>
-                    // enhance or create bestellung by produzentT
-                    newBs.get((lieferposition.produzentId, create.lieferplanungId, lieferung.datum)) match {
-                      case None => {
-                        //create bestellung
-                        val bestellung = Bestellung(BestellungId.apply _, lieferposition.produzentId, lieferposition.produzentKurzzeichen, lieferplanung.id, lieferplanung.nr, lieferung.datum, None, 0)
-                        newBs += (lieferposition.produzentId, create.lieferplanungId, lieferung.datum) -> bestellung
-                      }
-                    }
-
-                    newBs.get((lieferposition.produzentId, create.lieferplanungId, lieferung.datum)) map { bestellung =>
-                      //fetch or create bestellposition by produkt
-                      val bp = newBPs.get((bestellung.id, lieferposition.produktId)) match {
-                        case Some(existingBP) => {
-                          val newMenge = existingBP.menge + lieferposition.menge.get
-                          val newPreis = existingBP.preis |+| lieferposition.preis
-                          val newAnzahl = existingBP.anzahl + lieferposition.anzahl
-                          val copyBP = copyTo[Bestellposition, Bestellposition](existingBP,
-                            "menge" -> newMenge,
-                            "preis" -> newPreis,
-                            "anzahl" -> newAnzahl)
-                          copyBP
-                        }
-                        case None => {
-                          //create bestellposition
-                          val bestellposition = Bestellposition(BestellpositionId.apply _,
-                            bestellung.id,
-                            lieferposition.produktId,
-                            lieferposition.produktBeschrieb,
-                            lieferposition.preisEinheit,
-                            lieferposition.einheit,
-                            lieferposition.menge.get,
-                            lieferposition.preis,
-                            lieferposition.anzahl)
-                          bestellposition
-                        }
-                      }
-                      newBPs += (bestellung.id, lieferposition.produktId) -> bp
-                      val newPreisTotal = bp.preis.get |+| bestellung.preisTotal
-                      val copyB = copyTo[Bestellung, Bestellung](bestellung,
-                        "preisTotal" -> newPreisTotal)
-                    }
-                  }
+    }
+    insert map {
+      _ match {
+        case (obj: Lieferplanung, nr: Int) =>
+          DB autoCommit { implicit session =>
+            //create lieferplanung
+            writeRepository.insertEntity(obj)
+          }
+          //alle nächsten Lieferungen alle Abotypen (wenn Flag es erlaubt)
+          readRepository.getLieferungenNext() map {
+            _ foreach {
+              lieferung =>                  
+                val lObj = copyTo[Lieferung, Lieferung](lieferung //"lieferplanungId" -> Some(lieferplanungId),
+                  //"lieferplanungNr" -> Some(nr)
+                  )
+                DB autoCommit { implicit session =>
+                  //create lieferplanung
+                  writeRepository.updateEntity[Lieferung, LieferungId](lObj)
                 }
+
             }
-
-          }
-
-          //jetzt die neuen objekte kreieren
-          newBs foreach {
-            case (_, bestellung) =>
-              writeRepository.insertEntity[Bestellung, BestellungId](bestellung)
-          }
-          newBPs foreach {
-            case (_, bestellposition) =>
-              writeRepository.insertEntity[Bestellposition, BestellpositionId](bestellposition)
           }
       }
     }
@@ -325,7 +269,7 @@ class StammdatenInsertService(override val sysConfig: SystemConfig) extends Even
                       newBPs += (bestellung.id, lieferposition.produktId) -> bp
                       val newPreisTotal = bp.preis.get |+| bestellung.preisTotal
                       val copyB = copyTo[Bestellung, Bestellung](bestellung,
-                            "preisTotal" -> newPreisTotal)
+                        "preisTotal" -> newPreisTotal)
                     }
                   }
                 }
