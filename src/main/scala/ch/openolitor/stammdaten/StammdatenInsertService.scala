@@ -91,10 +91,10 @@ class StammdatenInsertService(override val sysConfig: SystemConfig) extends Even
       createTour(meta, id, tour)
     case EntityInsertedEvent(meta, id: ProjektId, projekt: ProjektModify) =>
       createProjekt(meta, id, projekt)
-    case EntityInsertedEvent(meta, id, lieferplanungCreateData: LieferplanungCreate) =>
-      createLieferplanung(id, lieferplanungCreateData)
-    case EntityInsertedEvent(meta, id, bestellungCreateData: BestellungenCreate) =>
-      createBestellungen(id, bestellungCreateData)
+    case EntityInsertedEvent(meta, id: LieferplanungId, lieferplanungCreateData: LieferplanungCreate) =>
+      createLieferplanung(meta, id, lieferplanungCreateData)
+    case EntityInsertedEvent(meta, id: BestellungId, bestellungCreateData: BestellungenCreate) =>
+      createBestellungen(meta, id, bestellungCreateData)
     case EntityInsertedEvent(meta, id, entity) =>
       logger.debug(s"Receive unmatched insert event for entity:$entity with id:$id")
     case e =>
@@ -171,19 +171,28 @@ class StammdatenInsertService(override val sysConfig: SystemConfig) extends Even
     }
   }
 
-  def createLieferplanung(id: UUID, lieferplanung: LieferplanungCreate) = {
-    val lieferplanungId = LieferplanungId(id)
+  def createLieferplanung(meta: EventMetadata, lieferplanungId: LieferplanungId, lieferplanung: LieferplanungCreate)(implicit userId: UserId = meta.originator) = {
     val insert = readRepository.getLatestLieferplanung map {
       case Some(latestLP) => {
         val newNr = latestLP.nr + 1
-        val lp = copyTo[LieferplanungCreate, Lieferplanung](lieferplanung, "id" -> lieferplanungId,
-          "nr" -> newNr)
+        val lp = copyTo[LieferplanungCreate, Lieferplanung](lieferplanung, 
+          "id" -> lieferplanungId,
+          "nr" -> newNr,
+          "erstelldat" -> meta.timestamp,
+          "ersteller" -> meta.originator,
+          "modifidat" -> meta.timestamp,
+          "modifikator" -> meta.originator)
         (lp, newNr)
       }
       case None => {
         val firstNr = 1
-        val lp = copyTo[LieferplanungCreate, Lieferplanung](lieferplanung, "id" -> lieferplanungId,
-          "nr" -> firstNr)
+        val lp = copyTo[LieferplanungCreate, Lieferplanung](lieferplanung, 
+          "id" -> lieferplanungId,
+          "nr" -> firstNr,
+          "erstelldat" -> meta.timestamp,
+          "ersteller" -> meta.originator,
+          "modifidat" -> meta.timestamp,
+          "modifikator" -> meta.originator)
         (lp, firstNr)
       }
     }
@@ -192,7 +201,7 @@ class StammdatenInsertService(override val sysConfig: SystemConfig) extends Even
         case (obj: Lieferplanung, nr: Int) =>
           DB autoCommit { implicit session =>
             //create lieferplanung
-            writeRepository.insertEntity(obj)
+            writeRepository.insertEntity[Lieferplanung, LieferplanungId](obj)
           }
           //alle nächsten Lieferungen alle Abotypen (wenn Flag es erlaubt)
           readRepository.getLieferungenNext() map {
@@ -212,7 +221,7 @@ class StammdatenInsertService(override val sysConfig: SystemConfig) extends Even
     }
   }
 
-  def createBestellungen(id: UUID, create: BestellungenCreate) = {
+  def createBestellungen(meta: EventMetadata, id: BestellungId, create: BestellungenCreate)(implicit userId: UserId = meta.originator) = {
     DB autoCommit { implicit session =>
       //delete all Bestellpositionen from Bestellungen (Bestellungen are maintained even if nothing is added)
       readRepository.getBestellpositionenByLieferplan(create.lieferplanungId) foreach {
@@ -234,7 +243,7 @@ class StammdatenInsertService(override val sysConfig: SystemConfig) extends Even
                     newBs.get((lieferposition.produzentId, create.lieferplanungId, lieferung.datum)) match {
                       case None => {
                         //create bestellung
-                        val bestellung = Bestellung(BestellungId(UUID.randomUUID()), lieferposition.produzentId, lieferposition.produzentKurzzeichen, lieferplanung.id, lieferplanung.nr, lieferung.datum, None, 0)
+                        val bestellung = Bestellung(BestellungId.apply _, lieferposition.produzentId, lieferposition.produzentKurzzeichen, lieferplanung.id, lieferplanung.nr, lieferung.datum, None, 0)
                         newBs += (lieferposition.produzentId, create.lieferplanungId, lieferung.datum) -> bestellung
                       }
                     }
@@ -254,7 +263,7 @@ class StammdatenInsertService(override val sysConfig: SystemConfig) extends Even
                         }
                         case None => {
                           //create bestellposition
-                          val bestellposition = Bestellposition(BestellpositionId(UUID.randomUUID()),
+                          val bestellposition = Bestellposition(BestellpositionId.apply _,
                             bestellung.id,
                             lieferposition.produktId,
                             lieferposition.produktBeschrieb,
@@ -280,11 +289,11 @@ class StammdatenInsertService(override val sysConfig: SystemConfig) extends Even
           //jetzt die neuen objekte kreieren
           newBs foreach {
             case (_, bestellung) =>
-              writeRepository.insertEntity(bestellung)
+              writeRepository.insertEntity[Bestellung, BestellungId](bestellung)
           }
           newBPs foreach {
             case (_, bestellposition) =>
-              writeRepository.insertEntity(bestellposition)
+              writeRepository.insertEntity[Bestellposition, BestellpositionId](bestellposition)
           }
       }
     }
