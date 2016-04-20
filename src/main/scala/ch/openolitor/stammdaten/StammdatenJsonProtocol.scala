@@ -204,8 +204,9 @@ trait StammdatenJsonProtocol extends BaseJsonProtocol with LazyLogging with Auto
     def read(json: JsValue): E = defaultFormat.read(json)
   }
   
-  implicit val abotypFormat = enhanceWithBooleanFlag("aktiv")(jsonFormat22(Abotyp))
-  implicit val abotypModifyFormat = jsonFormat14(AbotypModify)
+  val abotypPlainFormat:JsonFormat[Abotyp] = implicitly[JsonFormat[Abotyp]]
+  implicit val abotypFormat = enhanceWithBooleanFlag("aktiv")(abotypPlainFormat)
+  implicit val abotypModifyFormat = jsonFormat15(AbotypModify)
 
   implicit val abotypSummaryFormat = jsonFormat2(AbotypSummary)
 

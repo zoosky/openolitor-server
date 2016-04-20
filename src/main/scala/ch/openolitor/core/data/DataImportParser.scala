@@ -170,7 +170,7 @@ class DataImportParser extends Actor with ActorLogging {
               laufzeit = row.value[Option[Int]](indexLaufzeit),
               laufzeiteinheit = Laufzeiteinheit(row.value[String](indexLaufzeiteinheit)),
               anzahlAbwesenheiten = row.value[Option[Int]](indexAnzahlAbwesenheiten),
-              //farbCode = row.value[String](indexFarbCode),
+              farbCode = row.value[String](indexFarbCode),
               zielpreis = row.value[Option[BigDecimal]](indexZielpreis),
               saldoMindestbestand = row.value[Int](indexSaldoMindestbestand),
               adminProzente = row.value[BigDecimal](adminProzente)))

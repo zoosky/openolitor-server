@@ -28,6 +28,7 @@ import ch.openolitor.core.models._
 import scalikejdbc._
 import java.util.UUID
 import ch.openolitor.core.JSONSerializable
+import ch.openolitor.core.scalax.Tuple23
 
 sealed trait Lieferzeitpunkt extends Product
 sealed trait Wochentag extends Lieferzeitpunkt
@@ -110,7 +111,7 @@ case class Abotyp(id: AbotypId,
   laufzeit: Option[Int],
   laufzeiteinheit: Laufzeiteinheit,
   anzahlAbwesenheiten: Option[Int],
-  //farbCode: String,
+  farbCode: String,
   zielpreis: Option[BigDecimal],
   saldoMindestbestand: Int,
   adminProzente: BigDecimal,
@@ -124,6 +125,36 @@ case class Abotyp(id: AbotypId,
   ersteller: UserId,
   modifidat: DateTime,
   modifikator: UserId) extends BaseEntity[AbotypId] with AktivRange with Product
+  
+object Abotyp {
+  def unapply(a: Abotyp) = {
+    Some(Tuple23(
+        a.id,
+        a.name,
+        a.beschreibung,
+        a.lieferrhythmus,
+        a.aktivVon,
+        a.aktivBis,
+        a.preis,
+        a.preiseinheit,
+        a.laufzeit,
+        a.laufzeiteinheit,
+        a.anzahlAbwesenheiten,
+        a.farbCode,
+        a.zielpreis,
+        a.saldoMindestbestand,
+        a.adminProzente,
+        a.wirdGeplant,
+        a.anzahlAbonnenten,
+        a.letzteLieferung,
+        a.waehrung,
+        a.erstelldat,
+        a.ersteller,
+        a.modifidat,
+        a.modifikator
+        ))
+  }
+}
 
 case class AbotypSummary(id: AbotypId, name: String) extends JSONSerializable
 
@@ -138,7 +169,7 @@ case class AbotypModify(
   laufzeit: Option[Int],
   laufzeiteinheit: Laufzeiteinheit,
   anzahlAbwesenheiten: Option[Int],
-  //farbCode: String,
+  farbCode: String,
   zielpreis: Option[BigDecimal],
   saldoMindestbestand: Int,
   adminProzente: BigDecimal,

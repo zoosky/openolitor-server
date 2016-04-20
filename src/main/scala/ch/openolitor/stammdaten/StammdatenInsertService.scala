@@ -41,6 +41,7 @@ import org.joda.time.DateTime
 import ch.openolitor.core.Macros._
 import shapeless.Tuple
 import org.joda.time.DateTime
+import scala.util.Random
 
 object StammdatenInsertService {
   def apply(implicit sysConfig: SystemConfig, system: ActorSystem): StammdatenInsertService = new DefaultStammdatenInsertService(sysConfig, system)
@@ -243,7 +244,7 @@ class StammdatenInsertService(override val sysConfig: SystemConfig) extends Even
                     newBs.get((lieferposition.produzentId, create.lieferplanungId, lieferung.datum)) match {
                       case None => {
                         //create bestellung
-                        val bestellung = Bestellung(BestellungId.apply _, lieferposition.produzentId, lieferposition.produzentKurzzeichen, lieferplanung.id, lieferplanung.nr, lieferung.datum, None, 0)
+                        val bestellung = Bestellung(BestellungId(Random.nextLong), lieferposition.produzentId, lieferposition.produzentKurzzeichen, lieferplanung.id, lieferplanung.nr, lieferung.datum, None, 0, DateTime.now, userId, DateTime.now, userId)
                         newBs += (lieferposition.produzentId, create.lieferplanungId, lieferung.datum) -> bestellung
                       }
                     }
@@ -263,7 +264,7 @@ class StammdatenInsertService(override val sysConfig: SystemConfig) extends Even
                         }
                         case None => {
                           //create bestellposition
-                          val bestellposition = Bestellposition(BestellpositionId.apply _,
+                          val bestellposition = Bestellposition(BestellpositionId(Random.nextLong),
                             bestellung.id,
                             lieferposition.produktId,
                             lieferposition.produktBeschrieb,
@@ -271,7 +272,11 @@ class StammdatenInsertService(override val sysConfig: SystemConfig) extends Even
                             lieferposition.einheit,
                             lieferposition.menge.get,
                             lieferposition.preis,
-                            lieferposition.anzahl)
+                            lieferposition.anzahl, 
+                            DateTime.now,
+                            userId,
+                            DateTime.now,
+                            userId)
                           bestellposition
                         }
                       }
